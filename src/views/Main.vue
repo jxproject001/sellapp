@@ -38,32 +38,83 @@
     </div>
 
     <router-view />
-   
+
     <!-- 购物车 -->
-    <div class="shopcar"></div>
+
+    <transition name="slide-fade">
+      <div v-show="shopcarShow" class="shopcar-board">
+        <shopcar />
+      </div>
+    </transition>
+    <div class="shopcar" @click="shopcarShow = !shopcarShow">
+      <div class="left">
+        <div class="circle">
+          <img :src="img3" alt />
+        </div>
+      </div>
+      <div class="middle">
+        <p>
+          <span>￥{{allprice()}}</span>|
+          <span style="font-size:12px;">另需配送费{{data.deliveryPrice}}元</span>
+        </p>
+      </div>
+      <div class="right">￥{{data.minPrice}}起送</div>
+    </div>
   </div>
 </template>
     
 <script>
-import { getseller } from "../api/apis";
+import shopcar from "./Shopcar.vue";
+import { getseller,getgoods  } from "../api/apis";
 import img from "../assets/img/brand@2x.png";
 import img1 from "../assets/img/decrease_1@2x.png";
 import img2 from "../assets/img/bulletin@2x.png";
+import img3 from "../assets/img/shopcar.png";
 export default {
+  components: {
+    shopcar
+  },
   data() {
     return {
       data: {},
       img: img,
       img1: img1,
-      img2: img2
+      img2: img2,
+      img3: img3,
+      // allprice: 0,
+      shopcarShow: false
     };
   },
   created() {
     getseller().then(d => {
       console.log(d.data.data);
       this.data = d.data.data;
+
     });
-  }
+    getgoods().then(d => {
+      console.log(d.data.data);
+      this.$store.commit('initGoodsList', d.data.data)
+
+    });
+  },
+  methods: {
+     allprice() {
+      var total = 0;
+      this.getgoods.forEach(f => {
+        f.foods.forEach(y => {
+          if (y.num > 0) {
+            total += y.num*y.price;
+          }
+        });
+      });
+        return total;
+    }
+  },
+  computed: {
+    getgoods(){
+       return this.$store.state.goodslist;
+    }
+  },
 };
 </script>
     
@@ -72,15 +123,15 @@ export default {
   padding: 0;
   margin: 0;
   display: flex;
-    flex-flow :column;
-    align-items: stretch;
+  flex-flow: column;
+  align-items: stretch;
   height: 100%;
   //   background: rgb(244, 245, 247);
   .Merchant_info {
     height: 120px;
     width: 100%;
-        background-size: cover;
-        // filter: blur(10px);
+    background-size: cover;
+    // filter: blur(10px);
     // background: rgb(65, 60, 57);
     display: flex;
     .Merchant_info_left {
@@ -133,20 +184,21 @@ export default {
   .info {
     background: rgb(65, 60, 57);
     height: 30px;
-   
+
     .infobg {
       background: rgba(247, 247, 247, 0.1);
       line-height: 30px;
       color: aliceblue;
-     
+
       img {
         vertical-align: middle;
         margin-left: 15px;
         width: 30px;
       }
-span{
-    padding-left: 10px;font-size: 12px;
-}
+      span {
+        padding-left: 10px;
+        font-size: 12px;
+      }
       display: block; /*内联对象需加*/
       word-break: keep-all; /* 不换行 */
       white-space: nowrap; /* 不换行 */
@@ -173,10 +225,62 @@ span{
   .shopcar {
     position: fixed;
     bottom: 0;
-    height: 50px;
+    height: 40px;
     width: 100%;
-    background: rgba(10, 10, 10, 0.5);
+    // background: rgba(10, 10, 10, 0.5);
+    background: rgb(19, 29, 38);
+    display: flex;
+    justify-content: space-between;
+
+    .left {
+      width: 20%;
+      .circle {
+        position: absolute;
+        left: 15px;
+        bottom: 0;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: rgb(19, 29, 38);
+        img {
+          width: 40px;
+          margin: 5px;
+        }
+      }
+    }
+    .middle {
+      width: 55%;
+      line-height: 40px;
+      span {
+        padding: 0 15px;
+      }
+    }
+    .right {
+      width: 25%;
+      line-height: 40px;
+      background: rgb(43, 52, 59);
+      text-align: center;
+    }
   }
-  
+}
+
+.shopcar-board {
+  position: fixed;
+  height: 200px;
+  width: 100%;
+  bottom: 40px;
+  background-color: #fff;
+  // overflow: scroll;
+}
+.slide-fade-enter-active {
+  transition: all 0.4s ease;
+}
+.slide-fade-leave-active {
+  transition: all 0.4s ease;
+}
+.slide-fade-enter,
+.slide-fade-leave-to {
+  transform: translateY(200px);
+  opacity: 0;
 }
 </style>

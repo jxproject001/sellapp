@@ -1,6 +1,7 @@
 <template>
   <div id="evaluate">
-    <Row class="evaluate">
+    <ul class="content">
+      <Row class="evaluate">
       <i-col class="eva_left" span="8">
         <div>
           <h1
@@ -45,18 +46,20 @@
           <Avatar :src="v.avatar" />
         </i-col>
         <i-col span="21">
-          <p>{{v.username}}</p>
-          <Rate class="small1" disabled show-text allow-half v-model="valueCustomText">
+          <p>{{v.username}}{{v.rateTime}}</p>
+          <Rate class="small1" disabled show-text allow-half v-model="v.score">
             <span class="spana">{{data.deliveryTime}}分钟送达</span>
           </Rate>
           <p>{{v.text}}</p>
         </i-col>
       </div>
     </div>
+    </ul>
   </div>
 </template>
 
 <script>
+import BScroll from "better-scroll";
 import { getseller } from "../api/apis";
 import { getratings } from "../api/apis";
 export default {
@@ -69,6 +72,11 @@ export default {
       buttonSize: "large"
     };
   },
+  mounted() {
+    new BScroll(document.querySelector("#evaluate"), {
+      click: true
+    });
+  },
   created() {
     var that = this;
     getseller().then(d => {
@@ -80,6 +88,7 @@ export default {
     getratings().then(b => {
       console.log(b);
       that.user = b.data.data;
+
     });
   }
 };
@@ -89,6 +98,7 @@ export default {
 #evaluate {
   background: rgb(244, 245, 247);
   min-height: 500px;
+  overflow: scroll;
   .evaluate {
     padding: 15px 15px 15px 15px;
     background: #fff;
